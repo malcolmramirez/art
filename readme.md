@@ -1,5 +1,8 @@
-supercollider setup:
-- see: startup.sc for the main startup script. my supercollider startup file just looks like this:
+## art
+
+### supercollider setup:
+
+see: startup.sc for the main startup script. my supercollider startup file just looks like this:
 
 ```
 "/absolute/path/to/repo/startup/startup.sc".loadRelative;
