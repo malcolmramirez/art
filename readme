@@ -5,5 +5,5 @@ supercollider setup:
 "startup.sc".loadRelative;
 ```
 
-running some files will require samples. create a `samples` folder in the root. got samples from the spots:
+running some files will require samples. create a `samples` folder in the root. got samples from these spots:
 - https://slab.org/tmp/samples-extra.zip
