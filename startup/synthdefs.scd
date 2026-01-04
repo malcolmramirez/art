@@ -69,5 +69,22 @@ SynthDef(\pulsar, {
 
     Out.ar(\i_out.kr(0), sig);
 }).add;
+
+// Acid bass?
+SynthDef.new(\acid, {
+    var freq = \freq.kr(110);
+    var env = Env.perc(\atk.kr(0.1), \rel.kr(0.5));
+    var fenv = Env.perc(\fatk.kr(0.0001), \frel.kr(0.1), curve: \fcurve.kr(1));
+    var sig = Pulse.ar(freq);
+
+    fenv = fenv.ar * (freq * \fhi.kr(50)) + (freq * \flo.kr(10));
+
+    sig = RLPF.ar(sig, fenv, \q.kr(10).reciprocal);
+    sig = sig * \amp.kr(1);
+    sig = sig * env.ar(Done.freeSelf);
+    sig = Pan2.ar(sig, \pan.kr(0));
+
+    Out.ar(\i_out.kr(0), sig);
+}).add;
 )
 

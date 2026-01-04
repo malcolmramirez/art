@@ -1,26 +1,40 @@
 (
 b = 150/60;
 p = ProxySpace(s)
-    .fadeTime_(0)
+    .fadeTime_(4)
     .quant_(4)
     .makeTempoClock(b)
     .push;
+)
+
+~snare.play;
+(
+~snare[0] = Pbind(
+    \instrument, \oneshot,
+    \buf, d[\cpu][3],
+    // \dur, Pseq([Rest(1), 1/4, Rest(3/4)], inf),
+    \dur, Pwrand([
+        Pseq([Rest(1), 1/4, Rest(3/4)]),
+        Pseq([Rest(1), 1/4, Rest(2/4), 1/4]),
+        Pseq([Rest(1), Pn(1/4, 4)])
+    ], [5, 4, 1].normalizeSum, inf),
+    \amp, -17.dbamp,
+);
 )
 
 ~kick.play;
 (
 ~kick[0] = Pbind(
     \instrument, \oneshot,
-    \buf, d[\bssnare][7],
-    // \__ghost, 0,
-    \__ghost, Pseq(0.dup(3*8) ++ 1.dup(4), inf),
+    \buf, d[\cpu2][0],
+    \__ghost, Pwrand([0, 1], [8, 1].normalizeSum, inf),
     \dur, Pswitch([
-        Pseq([Rest(1/2), 1/4, Rest(1/4)]),
-        Pseq([Rest(1/4), 1/4, 1/8, Rest(3/8)])
-    ], Pkey(\__ghost)),
+        Pseq([1]),
+        Pseq([1/4, 3/4]),
+    ], Pkey(\__ghost), inf),
     \amp, Pswitch([
-        1,
-        Pseq([0, -5, 0, 0].collect(_.dbamp))
+        -15.dbamp,
+        Pseq([-15, -30, -15].collect(_.dbamp))
     ], Pkey(\__ghost))
 );
 )
@@ -30,9 +44,16 @@ p = ProxySpace(s)
 ~glitch[0] = { 
     var sig = Convolution.ar(~kick, ~grained) * 0.5;
     sig = CombC.ar(sig, b/2, b/6, b/4);
-    sig = PitchShift.ar(sig, b/8, pitchRatio: 4, timeDispersion: 
-        TChoose.ar(Impulse.ar(b), [b/8, b/16, b/32].collect{|i| DC.ar(i)}));
-    sig = sig * 0.15;
+    sig = PitchShift.ar(
+        in: sig,
+        windowSize: b/8,
+        pitchRatio: 4,
+        pitchDispersion: 2,
+        timeDispersion: TChoose.ar(
+            Impulse.ar(b), 
+            [b/8, b/16, b/32].collect{|i| DC.ar(i)}));
+    sig = sig * 0.25;
+    sig;
 }
 )
 
@@ -40,11 +61,11 @@ p = ProxySpace(s)
 (
 ~pulsar[0] = Pbind(
     \instrument, \pulsar,
+    // \buf, d[\sigs][0],
     \buf, Pwrand([d[\sigs][0], d[\cpu][0]], [4, 1].normalizeSum, inf),
+    // \degree, [1, 5, 8],
     \degree, Pwrand([[1, 5, 8], [3, 9, 12]], [4, 1].normalizeSum, inf),
     \octave, Pwrand([1, 2, 3], [1, 4, 2].normalizeSum, inf),
-    // \buf, d[\sigs][0],
-    // \degree, [1, 5, 8],
     // \octave, 2,
     \sust, Pwhite(1/32, 1/4),
     \atk, 1/32,
@@ -68,7 +89,7 @@ p = ProxySpace(s)
             Pseq([0, 2, 2, 3, 4, 5, 6, 7])
         ], 1),
         Pseq([Pn(2, 8), Pwrand((0..7), (1..8).normalizeSum.reverse, 8)], 1)
-    ], [4, 1].normalizeSum, inf).trace,
+    ], [4, 1].normalizeSum, inf),
     \tempo, b,
     \bars, 8,
     \amp, -2.dbamp,
@@ -87,6 +108,9 @@ p = ProxySpace(s)
 };
 ~lfo2 = {
     SinOsc.ar(b/32).range(1, 5)
+};
+~lfo3 = { 
+    SinOsc.ar(b/4).unipolar;
 };
 
 ~grained = {
