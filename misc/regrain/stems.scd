@@ -1,7 +1,7 @@
 (
 b = 150/60;
 p = ProxySpace(s)
-    .fadeTime_(4)
+    .fadeTime_(1)
     .quant_(4)
     .makeTempoClock(b)
     .push;
