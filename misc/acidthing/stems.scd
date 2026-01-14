@@ -27,7 +27,7 @@ SynthDef(\saw, {
 (
 ~kd = Pbind(
     \instrument, \oneshot,
-    \dur, 1/2,
+    \dur, 1,
     \buf, d[\cpu2][0]
 )
 )
@@ -42,59 +42,127 @@ SynthDef(\saw, {
         Rest(2),
         Pseq([Rest(3/4), 1/8, 1/8])
     ], inf),
-    \buf, d[\bssnare][2],
-    \amp, -15.dbamp,
+    \buf, d[\cpu2][3],
+    \amp, -45.dbamp,
 )
 )
 
-~acid.play;
+
+~cp.play;
 (
-~acid[0] = Pbind(
-    \dur, Pwrand([1/4, Rest(2)], [4, 1].normalizeSum, inf),
-    \instrument, \acid,
-    \scale, Scale.partch_o1,
-    \atk, 0.1,
-    \rel, 0.1,
-    \degree, Pseq([0, 1, 3, 10], inf),
-    \octave, 2
+~cp = Pbind(
+    \instrument, \oneshot,
+    \dur, Pseq([
+        Rest(1/4), 1/2, Rest(1/4),
+        Rest(1/4), 1/2, Rest(1/4),
+        Rest(1/4), 1/2, Rest(1/4),
+        Rest(1/4), 1/4, 1/4, Rest(1/4),
+    ], inf),
+    \buf, d[\cpu2][3],
+    \amp, Pseq([
+        Pn(-15.dbamp, 3),
+        Pn(-15.dbamp, 3),
+        Pn(-15.dbamp, 3),
+        -15.dbamp, -30.dbamp, Pn(-15.dbamp, 2)
+    ], inf),
+)
+)
+
+(
+
+)
+
+~goop.play;
+(
+~goop[0] = Pbind(
+    \instrument, \saw,
+    \dur, 1/8,
+    \atk, 1/16,
+    \rel, 1/16,
+    \octave, 6,
+    \scale, Scale.phrygian,
+    \degree, Pseq([
+        0, 3, 7,
+        -1, 2, 5,
+        -3, 5, 7,
+    ], inf)
 );
 
-~acid[1] = \filterIn -> { |in|
-    var sig;
-    sig = CombC.ar(
-        in,
-        maxdelaytime: b,
-        delaytime: b/3,
-        decaytime: b
-    );
-    sig;
+~goop[1] = \filterIn -> { |in|
+    var sig = HPF.ar(in, 1200);
+    sig = LPF.ar(in, 2400);
 };
 
-~pitchRatio = {
-    TWChoose.ar(
-        Dust.ar(b*8),
-        [1,2,3,4].collect{|n| DC.ar(n)},
-        [2,4,1,1].normalizeSum
-    );
+~kern = Pbind(
+    \instrument, \slicer,
+    \buf, d[\break][0],
+    \bars, 8,
+    \tempo, b,
+    \dur, Pkey(\bars)
+);
+~goop[2] = \filterIn -> { |in| 
+    Convolution.ar(in, ~kern.ar, framesize: 4096);
 };
-~timeDispersion = {
-    Select.ar(
-        ToggleFF.ar(Dust.ar(b)),
+~wet2 = { SinOsc.ar(b/24).range(0.1, 0.5) };
+~goop.set(\wet2, ~wet2);
+
+~goop[3] = \filterIn -> { |in| 
+    FreeVerb.ar(in, room: 0.8, mix: 0.25);
+};
+
+~goop[4] = \filterIn -> { |in| 
+    LPF.ar(in, SinOsc.ar(b/16).range(220, 2400))
+};
+
+)
+
+
+~acid.play;
+~acid.end;
+(
+~acid[0] = Pbind(
+    \dur, Pseq([
+        // 1/4, 2, 1/4, 2,
+        // 1/4, 1/4, 3/2, 1/4, 7/4
+        Rest(1/4), 1/4, 
+    ], inf),
+    \instrument, \acid,
+    \scale, Scale.phrygian,
+    \atk, 0.075,
+    \rel, 0.075,
+    // \degree, Pseq([-3, 0, 1, 3, 5], inf),
+    \degree, 0,
+    \octave, 2
+);
+)
+
+(
+~acid[1] = \filterIn -> { |in| 
+    FreeVerb.ar(in);
+};
+
+~acid[2] = \filterIn -> { |in| 
+    var timeDispersion = TChoose.ar(
+        Impulse.ar(b*6),
         [
             SinOsc.ar(b).unipolar,
             LFTri.ar(b*2).unipolar,
             LFSaw.ar(b*4).range(0.5, 1)
         ]);
-};
-~acid[2] = \filterIn -> { |in| 
+    var pitchRatio = TWChoose.ar(
+        Impulse.ar(b*8),
+        [1,2,3].collect{|n| DC.ar(n)},
+        [2,4,1].normalizeSum
+    );
+
     PitchShift.ar(
         in,
         windowSize: b,
-        pitchRatio: ~pitchRatio.ar,
+        pitchRatio: pitchRatio, 
         pitchDispersion: 0,
-        timeDispersion: ~timeDispersion.ar
+        timeDispersion: timeDispersion
     )
 };
-
+~acid.set(\wet2, 0.5);
 )
 
