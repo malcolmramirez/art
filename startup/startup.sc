@@ -15,13 +15,13 @@ s.reboot { // server options are only updated on reboot
     // Load samples
     s.waitForBoot {
         var loadSamples = { |path|
-                PathName(path)
-                    .entries
-                    .select { |f| SoundFile.openRead(f.fullPath) != nil }
-                    .collect { |f|
-                        Buffer.read(s, f.fullPath);
-                    };
-            };
+            PathName(path)
+                .entries
+                .select { |f| SoundFile.openRead(f.fullPath) != nil }
+                .collect { |f|
+                    Buffer.read(s, f.fullPath);
+                };
+        };
         d = Dictionary[];
 
         // load samples

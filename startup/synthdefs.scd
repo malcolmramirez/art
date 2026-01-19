@@ -27,9 +27,7 @@ SynthDef(\slicer, {
 SynthDef(\oneshot, {
     var bufnum = \buf.kr;
     var bufdur = BufDur.kr(bufnum);
-    var atk = bufdur * \begin.kr(0);
-    var rel = bufdur * \end.kr(1);
-    var env = Env([0, 1, 1, 0], [atk, rel, 0], curve: \curve.kr(1));
+    var gate = Env([0, 1, 1, 0], [0, 1, 0]);
     var channels = BufChannels.kr(bufnum);
     var sig = PlayBuf.ar(
         numChannels: 2,
@@ -39,7 +37,7 @@ SynthDef(\oneshot, {
         startPos: 0);
 
     sig = Select.ar(BufChannels.kr(bufnum) - 1, [sig!2, sig]);
-    sig = sig * env.ar(Done.freeSelf);
+    sig = sig * gate.ar(Done.freeSelf);
     sig = sig * \amp.kr(1);
 
     Out.ar(\i_out.kr(0), sig);
@@ -83,6 +81,22 @@ SynthDef.new(\acid, {
     sig = sig * \amp.kr(1);
     sig = sig * env.ar(Done.freeSelf);
     sig = Pan2.ar(sig, \pan.kr(0));
+
+    Out.ar(\i_out.kr(0), sig);
+}).add;
+
+// Sawtooth
+SynthDef(\saw, {
+    var sig;
+
+    sig = Saw.ar(\freq.kr(440));
+    sig = sig * \amp.kr(0.dbamp);
+    sig = Pan2.ar(sig, \pan.kr(0));
+    sig = sig * Env(
+        [0, 1, 1, 0], 
+        [\atk.kr(0.1), \sus.kr(0), \rel.kr(0.1)], 
+        \curve.kr([0, 0, 0])
+    ).ar(Done.freeSelf);
 
     Out.ar(\i_out.kr(0), sig);
 }).add;
