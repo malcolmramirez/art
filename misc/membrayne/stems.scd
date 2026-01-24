@@ -7,6 +7,7 @@ p = ProxySpace(s)
     .push;
 )
 
+Ndef(\mic, { SoundIn.ar(0) ! 2 }).gui;
 
 ~kd.play;
 (
@@ -18,7 +19,7 @@ p = ProxySpace(s)
         Pseq([1, Rest(1/2), 1/2]),
         Pseq([1, Rest(1)])
     ], inf),
-    \amp, -4.dbamp
+    \amp, -8.dbamp
 );
 )
 
@@ -68,7 +69,7 @@ var dur = 1/2;
     ], inf),
     \dur, dur,
     \rate, Prand([2, 4, 8], inf),
-    \amp, Pwhite(-1.dbamp, 5.dbamp)
+    \amp, Pwhite(-3.dbamp, 3.dbamp)
 );
 ~hit[1] = \filterIn -> { |in|
     var sig, imp;
@@ -148,9 +149,22 @@ var dur = 1/2;
 };
 )
 
+~bg.play;
+
+~pd.play; ~kd.play; ~hit.play; ~sn.play;
+
+~hit.play
+
+~hit.stop; ~bg.stop;
+
+~kd.stop;
+~sn.stop;
+
+~pd.stop;
+
 ~pd.play;
 (
-var amp = -10.dbamp;
+var amp = -12.dbamp;
 
 ~pd[0] = Pbind(
     \instrument, \saw,
@@ -207,6 +221,7 @@ var amp = -10.dbamp;
             XFade2.ar(Convolution.ar(in, sig, 4096) * -20.dbamp, sig)
         ]
     );
+
     sig;
 };
 )
