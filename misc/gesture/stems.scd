@@ -57,7 +57,7 @@ p = ProxySpace(s)
 
 )
 
-~kd.end;
+~kd.play;
 (
 ~kd[0] = Pbind(
     \instrument, \slicer,
@@ -68,7 +68,7 @@ p = ProxySpace(s)
         Pseq((0..15)),
         Pn(16, 1),
     ], inf),
-    \bars, 4,
+    \bars, 8,
     \dur, Pkey(\bars) / Pkey(\slices)
 );
 
