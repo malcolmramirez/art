@@ -7,21 +7,25 @@ p = ProxySpace(s)
     .push;
 )
 
-~pout.play;
-~pgrain.play;
-
+~pout.end(4);
+~pgrain.end(4);
+~b.end(4)
+~h.end(4)
 (
 ~p[0] = Pbind(
     \instrument, \saw,
     \degree, Pseq([
         Pn([0, 3, 7], 4),
         Pn([0, 3, 9], 1),
+        Pn([0, 3, 7], 4),
+        Pn([0, 4, 7], 1),
     ], inf),
+    \octave, 4,
     \atk, b,
     \sus, b/2,
     \rel, b*2,
     \dur, 4,
-    \amp, -10.dbamp
+    \amp, -12.dbamp
 );
 
 ~p[1] = \filterIn -> {|in|
@@ -42,7 +46,7 @@ p = ProxySpace(s)
         windowSize: b/4,
         pitchRatio: TChoose.ar(
             imp,
-            [1,2,3].collect { |n| DC.ar(n) }
+            [2,3,4].collect { |n| DC.ar(n) }
         ),
         timeDispersion: SinOsc.ar(b).range(b/128, b/64)
     );
@@ -54,7 +58,7 @@ p = ProxySpace(s)
 
 ~pout[0] = {
     var sig = ~p.ar * -4.dbamp;
-    HPF.ar(sig, LFNoise2.ar(b).range(150, 300));
+    HPF.ar(sig, LFNoise2.ar(b).range(50, 300));
 };
 )
 
@@ -73,9 +77,15 @@ p = ProxySpace(s)
         Rest(1/2), 1/2,
         Pn(1/8, 4),
     ], inf),
-    \amp, -18.dbamp,
-    // Make deterministic
-    \rate, Pwrand([1, 8], [1, 10].normalizeSum, inf)
+    \amp, -23.dbamp,
+    \rate, Pseq([
+        1,
+        1,
+        Pn(8, 20),
+        8,
+        8,
+        Pn(8, 20)
+    ], inf)
 );
 ~b[1] = \filterIn -> { |in|
     var freq, hasFreq, sig;
@@ -99,8 +109,8 @@ p = ProxySpace(s)
         Rest(3/4)
     ], inf),
     \rate, 8,
+    \amp, -28.dbamp
 );
 )
-
-~break.end
+~h.end(2)
 
