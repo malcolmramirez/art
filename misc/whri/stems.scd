@@ -48,13 +48,14 @@ SynthDef(\p, {
         [0, 1, 3],
         [-1, 1, 4],
     ], inf),
-    \vol, 5,
+    \vol, 0.5.dbamp,
     \fbmax, Pexprand(0.2, 0.5, inf)
 );
 
 ~p[10] = \filterIn -> { |in|
     FreeVerb.ar(in, mix: 0.4, room: 0.5, damp: 0.1);
 };
+
 )
 
 ~k.play;
@@ -62,8 +63,8 @@ SynthDef(\p, {
 ~k[0] = Pbind(
     \instrument, \oneshot,
     \buf, d[\cpu2][1],
-    \rate, 2,
-    \amp, 0.75,
+    \rate, 1,
+    \amp, -20.dbamp,
     \dur, Pseq([
         4, 
         2,
@@ -80,9 +81,9 @@ SynthDef(\p, {
     \buf, d[\cpu2][4],
     \rate, 4,
     \amp, Pseq([
-        Pn(0.75, 3),
-        0.25,
-        Pn(0.75, 2),
+        Pn(-20.dbamp, 3),
+        -30.dbamp,
+        Pn(-20.dbamp, 2),
     ], inf),
     \dur, Pseq([
         Rest(1), 
@@ -112,16 +113,104 @@ SynthDef(\p, {
         Pwrand([1/4, Rest(1/4)], [1, 2].normalizeSum), 
         1/4
     ], inf),
-    \amp, 0.75
+    \amp, -17.dbamp
 )
 )
 
 ~singrain.play;
 (
 ~singrain = {
-    var sig;
+    var sig, carf, imp;
 
-    sig = GrainFM.ar()
+    imp = Impulse.ar(b*4);
+    carf = SinOsc.ar(b).range(2000, 2400);
+    sig = GrainFM.ar(
+        numChannels: 2,
+        trigger: PulseDivider.ar(imp, TRand.ar(1, 4, imp)),
+        dur: TRand.ar(1/256, 1/128, imp),
+        carfreq: carf,
+        modfreq: carf*LFNoise2.ar(b*2).range(1, 2),
+        index: LFNoise2.ar(b).range(1, 10),
+        pan: TRand.ar(-1, 1, imp),
+    );
+
+    // sig = PitchShift.ar(
+    //     in: sig,
+    //     windowSize: b,
+    //     pitchDispersion: SinOsc.ar(b).range(0, 1),
+    //     timeDispersion: LFNoise2.ar(b*16).range(b/64, b/2)
+    // );
+
+    // sig = Mix.ar(Hilbert.ar(sig));
+    sig = Slew.ar(sig, 2000, 2000);
+
+    sig;
 }
+)
+
+~saw.play;
+(
+~saw[0] = Pbind(
+    \instrument, \p,
+    \dur, 4,
+    \atk, 0.5,
+    \sus, 0,
+    \rel, Pexprand(0.25, 0.5, inf),
+    \scale, Scale.dorian,
+    \octave, 3,
+    \degree, [1, 0, 2],
+    \amp, -2.dbamp,
+);
+
+~kern = Pbind(
+    \instrument, \oneshot,
+    \dur, 4,
+    \buf, d[\bsperc][4],
+    \rate, 2,
+    \amp, -2.dbamp,
+);
+
+~saw[2] = \filterIn -> { |in| Convolution.ar(in, ~kern.ar, 4096) * -2.dbamp };
+
+~saw[3] = \filterIn -> { |in| RHPF.ar(in, SinOsc.ar(b/SinOsc.ar(b).range(1/4, 2)).range(400, 2400)) };
+
+~saw[4] = \filterIn -> { |in| 
+    PitchShift.ar(
+        in,
+        windowSize: b,
+        // pitchRatio: 2,
+        pitchRatio: 2, 
+        timeDispersion: b/4,
+    )
+};
+
+// ~saw[5] = \filterIn -> { |in| 
+//     GrainIn.ar(
+//         numChannels: 2,
+//         trigger: Impulse.ar(b*4),
+//         dur: TChoose.ar(
+//             Impulse.ar(b*16),
+//             [b/16, b/32, b/128].collect{|n|DC.ar(n)}
+//         ),
+//         in: in,
+//         pan: TRand.ar(-0.5, 0.5, Impulse.ar(b*2))
+//     );
+// };
+
+// ~saw[6] = \filterIn -> { |in| 
+//     FreeVerb.ar(
+//         in,
+//         mix: SinOsc.ar(b/4).range(0.05, 0.25),
+//         room: 0.9
+//     )
+// };
+
+// ~saw[6] = \filterIn -> { |in| RLPF.ar(in, LFNoise2.ar(b).range(0, 50) + SinOsc.ar(b/16).range(10000, 4000)) };
+
+~saw[6] = \filterIn -> { |in| LPF.ar(in, 20000) };
+~saw[7] = \filterIn -> { |in| HPF.ar(in, 99) };
+
+~saw[8] = \filterIn -> { |in| Normalizer.ar(in, -10.dbamp) }
+
 )
 
