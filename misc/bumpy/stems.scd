@@ -11,29 +11,26 @@ p = ProxySpace(s)
 (
 ~k[0] = Pbind(
     \instrument, \oneshot,
-    \buf, d[\cpu][0],
-    \rate, 1,
-    // \dur, Pseq([
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     Rest(1/2), 1/2, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1/6, 1/6, 1/6, 1, 1, 1,
-    // ], inf),
-    // \dur, Prewrite(
-    //     1/2,
-    //     IdentityDictionary[
-    //         1/2 -> [1/2, Rest(1/4), 1/4],
-    //         1/4 -> [1/4, Rest(1/4), 1/2],
-    //         Rest(1/4) -> [1/2, 1/2],
-    //     ],
-    //     4
-    // ),
-    \dur, 1,
-    \amp, -4.dbamp,
+    \buf, d[\cpu2][4],
+    \rate, Pwrand([1, 2, 1/2], [4, 2, 1].normalizeSum, inf),
+    \dur, Prewrite(
+        1/2,
+        IdentityDictionary[
+            1/2 -> [1/2, Rest(1/4), 1/4],
+            1/4 -> [1/4, Rest(1/4), 1/2],
+            Rest(1/4) -> [1/8, 1/2],
+        ],
+        4
+    ),
+    \amp, -8.dbamp * Prewrite(
+        1/2,
+        IdentityDictionary[
+            1/2 -> [1/8, 1/2, 1/4],
+            1/4 -> [1/4, 1/8, 1/2],
+            1/8 -> [1/4, 1/2],
+        ],
+        4
+    ),
 );
 )
 
@@ -41,24 +38,17 @@ p = ProxySpace(s)
 (
 ~s[0] = Pbind(
     \instrument, \oneshot,
-    \buf, d[\cpu2][4],
-    // \dur, Pseq([
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     Rest(1/2), 1/2, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1, 1, 1, 1,
-    //     1/6, 1/6, 1/6, 1, 1, 1,
-    // ], inf),
-    \dur, Pseq([Rest(1/2), 1/2], inf),
-    \rate, 3,
-    \amp, 0.dbamp,
+    \buf, d[\cpu2][11],
+    \dur, Pseq([
+        1, Rest(4),
+    ], inf),
+    // \dur, Pseq([Rest(1/2), 1/2], inf),
+    \rate, 0.5,
+    \amp, -5.dbamp,
 );
 )
 
-~p.play;
+~p.end;
 (
 ~p[0] = Pbind(
     \instrument, \slicer,
@@ -78,67 +68,66 @@ p = ProxySpace(s)
 )
 )
 
+d.keys.postln;
 ~saw.play;
 (
 ~saw[0] = Pbind(
     \instrument, \saw,
-    \dur, 4,
+    \dur, Prewrite(
+        1,
+        IdentityDictionary[
+            1 -> [1, Rest(1/2), 1/2],
+            1/2 -> [1/2, Rest(1/2), 1],
+            Rest(1/2) -> [1, 1],
+        ],
+        4
+    ),
     \scale, Scale.dorian,
     \octave, 5,
-    \degree, 1,
-    \amp, -2.dbamp,
+    \degree, Pseq(
+        [
+            [0, 3, 5],
+            [0, 3, 8],
+            [-2, 0, 8],
+            [3, 8, 13]
+        ], 
+        inf
+    ),
+    \amp, 0.dbamp,
 );
 
 ~kern = Pbind(
     \instrument, \oneshot,
-    \dur, 4,
-    \buf, d[\bsperc][4],
-    \rate, 2,
-    \amp, -2.dbamp,
+    \dur, 1/2,
+    \buf, Pfuncn({
+        var bufs = d[\cpu2];
+        var i = 11.rand;
+        i.postln;
+        bufs[i]
+    }, inf),
+    \rate, 1,
+    \amp, 0.dbamp,
 );
 
+~saw[2] = \filterIn -> { |in| Convolution.ar(~kern.ar, in, 4096) * -50.dbamp };
 
-~saw[2] = \filterIn -> { |in| Convolution.ar(in, ~kern.ar, 4096) * -2.dbamp };
-
-~saw[3] = \filterIn -> { |in| RHPF.ar(in, SinOsc.ar(b/SinOsc.ar(b).range(1/4, 2)).range(400, 2400)) };
+~saw[3] = \filterIn -> { |in| RLPF.ar(in, SinOsc.ar(b/4).range(100, 2400)) };
 
 ~saw[4] = \filterIn -> { |in| 
     PitchShift.ar(
         in,
-        windowSize: b,
-        // pitchRatio: 2,
+        windowSize: b*2,
         pitchRatio: TChoose.ar(
-             Impulse.ar(b*4),
-             [1, 2].collect{|n| DC.ar(n)}
+             Impulse.ar(b*8),
+             [2, 1].collect{|n| DC.ar(n)}
         ), 
-        timeDispersion: b/4,
+        timeDispersion: b/16,
     )
 };
 
-~saw[5] = \filterIn -> { |in| 
-    GrainIn.ar(
-        numChannels: 2,
-        trigger: Impulse.ar(b*4),
-        dur: TChoose.ar(
-            Impulse.ar(b*16),
-            [b/16, b/32, b/128].collect{|n|DC.ar(n)}
-        ),
-        in: in,
-        pan: TRand.ar(-0.5, 0.5, Impulse.ar(b*2))
-    );
-};
-
-~saw[6] = \filterIn -> { |in| 
-    FreeVerb.ar(
-        in,
-        mix: SinOsc.ar(b/4).range(0.05, 0.25),
-        room: 0.5
-    )
-};
-
-~saw[7] = \filterIn -> { |in| LPF.ar(in, 20000) };
-~saw[8] = \filterIn -> { |in| HPF.ar(in, 99) };
-
-~saw[9] = \filterIn -> { |in| Normalizer.ar(in, -2.dbamp) }
+~saw[100] = \filterIn -> { |in| Normalizer.ar(in) }
 
 )
+
+~saw.clear
+
