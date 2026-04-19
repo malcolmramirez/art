@@ -75,3 +75,56 @@ SynthDef(\p, {
 
 ~p[100] = \filterIn -> { |in| Normalizer.ar(in, -5.dbamp) }
 )
+
+~d.play;
+(
+~d[0] = Pbind(
+    \slices, 16,
+    \slice, Pseq((0..15), inf),
+    \instrument, \slicer,
+    \buf, Pfuncn({
+        var bufs = d[\break];
+        bufs[8]
+    }, inf),
+    \tempo, b,
+    \bars, 3,
+    \dur, Pkey(\bars) / Pkey(\slices), 
+    \amp, 0.dbamp
+);
+
+~d[1] = \filterIn -> { |in| HPF.ar(in, SinOsc.ar(b).range(800, 1200)) };
+)
+
+~k.play;
+(
+~k[0] = Pbind(
+    \instrument, \oneshot,
+    \buf, d[\cpu2][0],
+    \dur, Pseq([8, 8, 3/2, 1/2], inf),
+    \amp, 0.dbamp
+);
+)
+
+~h.play;
+(
+~h[0] = Pbind(
+    \instrument, \oneshot,
+    \buf, d[\cpu2][6],
+    \dur, 1/4,
+    \rate, 2,
+    \amp, Pwhite(-20.dbamp, -10.dbamp)
+);
+)
+
+~s.end;
+(
+~s[0] = Pbind(
+    \instrument, \oneshot,
+    \buf, d[\cpu2][2],
+    \dur, Pseq([Rest(1/2), 3/2], inf),
+    \rate, 2,
+    \amp, -4.dbamp
+);
+)
+
+

@@ -48,7 +48,7 @@ p = ProxySpace(s)
 );
 )
 
-~p.end;
+~p.play;
 (
 ~p[0] = Pbind(
     \instrument, \slicer,

@@ -10,3 +10,11 @@ see: startup.sc for the main startup script. my supercollider startup file just 
 
 running some files will require samples. create a `samples` folder in the root. got samples from these spots:
 - https://slab.org/tmp/samples-extra.zip
+
+### tidal setup
+
+using [tidalvim](https://github.com/tidalcycles/vim-tidal/tree/master).
+```
+let g:tidal_sc_enable = 1
+let g:tidal_sc_boot = "/absolute/path/to/repo/startup/tidal_sc_boot.sc"
+```

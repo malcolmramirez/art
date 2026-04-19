@@ -100,5 +100,31 @@ SynthDef(\saw, {
 
     Out.ar(\i_out.kr(0), sig);
 }).add;
+
+// --- superdirt synths ---
+
+SynthDef(\braid, {
+    var sig = MiBraids.ar(
+        \freq.kr(440).cpsmidi * \speed.kr(1),
+        \timbre.kr(0),
+        \color.kr(0),
+        \model.kr(0),
+        \t_trig.kr(1),
+        resamp: 0,
+        ws: \ws.kr(0)
+    );
+    var env = Line.ar(
+        1, 
+        0, 
+        \sustain.kr(1), 
+        doneAction: Done.freeSelf);
+
+    OffsetOut.ar(
+        \out.kr,
+        DirtPan.ar(sig, ~dirt.numChannels, \pan.kr(0), env)
+    );
+}).add;
+
+s.sync;
 )
 

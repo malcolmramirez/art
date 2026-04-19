@@ -1,0 +1,16 @@
+d1 $ s "cpu:0(5, 16)"
+
+d2 $ s "cpu:2(2, 8, 2)" # speed 2
+
+d3 $ s "cpu:4*8"
+
+
+d4 $ 
+  fast 4 $
+  note "c e g f" #
+  octave 5 # 
+  s "supergong" #
+  attack 0.01 #
+  rel 0.1
+
+

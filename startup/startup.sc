@@ -4,35 +4,22 @@ s.reboot { // server options are only updated on reboot
 	// see http://doc.sccode.org/Classes/ServerOptions.html
     s.options.inDevice_("agg in");
     s.options.outDevice_("blackhole+phones");
-    s.options.sampleRate = 44100;
-    s.options.numBuffers = 1024 * 4;
-    s.options.memSize = 8192 * 32;
+	s.options.numBuffers = 1024 * 256; // increase this if you need to load more samples
+	s.options.memSize = 8192 * 32; // increase this if you get "alloc failed" messages
+	s.options.numWireBufs = 2048; // increase this if you get "exceeded number of interconnect buffers" messages
+	s.options.maxNodes = 1024 * 32; // increase this if you are getting drop outs and the message "too many nodes"
+	s.options.numOutputBusChannels = 2; // set this to your hardware output channel size, if necessary
+	s.options.numInputBusChannels = 2; // set this to your hardware output channel size, if necessary
 	s.latency = 0.1; // increase this if you get "late" messages
     
     // Safety settings
     s.options.safetyClipThreshold = 1;
 
-    // Load samples
     s.waitForBoot {
-        var loadSamples = { |path|
-            PathName(path)
-                .entries
-                .select { |f| SoundFile.openRead(f.fullPath) != nil }
-                .collect { |f|
-                    Buffer.read(s, f.fullPath);
-                };
-        };
-        d = Dictionary[];
+        // load dirt
+        "startdirt.scd".loadRelative;
 
-        // load samples
-        PathName("samples".resolveRelative)
-            .entries
-            .select { |f| f.isFolder }
-            .do { |f|
-                d[f.folderName.asSymbol] = loadSamples.(f.fullPath);
-            };
-
-        // load signals
+        d = SuperDirt.default.buffers.copy;
         d[\sigs] = [
             // sin
             {
@@ -45,8 +32,7 @@ s.reboot { // server options are only updated on reboot
 
         // load synthdefs
         "synthdefs.scd".loadRelative;
-        s.sync;
-    };
+    }
 };
 );
 
