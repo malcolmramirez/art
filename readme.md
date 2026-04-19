@@ -14,7 +14,3 @@ running some files will require samples. create a `samples` folder in the root. 
 ### tidal setup
 
 using [tidalvim](https://github.com/tidalcycles/vim-tidal/tree/master).
-```
-let g:tidal_sc_enable = 1
-let g:tidal_sc_boot = "/absolute/path/to/repo/startup/tidal_sc_boot.sc"
-```
