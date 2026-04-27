@@ -101,6 +101,27 @@ SynthDef(\saw, {
     Out.ar(\i_out.kr(0), sig);
 }).add;
 
+// --- neural synthesis ---
+
+SynthDef(\neuron, {
+    // in, seed, fb
+    var sig = \in.ar(#[0,0,0,0]);
+    var wsize = sig.size;
+    var weights = wsize.collect {
+        |i| 
+        Hasher.ar(\seed.ar(1) + i).linlin(-1, 1, 0, 1)
+    };
+
+    var feedback = LocalIn.ar(1);
+    sig = (sig * weights) + (feedback * \fbamt.ar(0.5));
+    sig = sig.sum / (wsize + \fbamt.ar(0.5));
+    sig = Normalizer.ar(sig);
+    sig = sig.tanh;
+    LocalOut.ar(sig);
+
+    Out.ar(\i_out.kr(0), sig!2);
+}).add;
+
 // --- superdirt synths ---
 
 SynthDef(\braid, {
@@ -113,12 +134,9 @@ SynthDef(\braid, {
         resamp: 0,
         ws: \ws.kr(0)
     );
-    var env = Line.ar(
-        1, 
-        0, 
-        \sustain.kr(1), 
-        doneAction: Done.freeSelf);
-
+    var decay = \decay.kr(0);
+    var sustain = \sustain.kr(1);
+    var env = EnvGen.ar(Env.pairs([[0,0],[0.05,1],[0.2,1-decay],[0.95,1-decay],[1,0]], -3), timeScale:sustain, doneAction:2);
     OffsetOut.ar(
         \out.kr,
         DirtPan.ar(sig, ~dirt.numChannels, \pan.kr(0), env)

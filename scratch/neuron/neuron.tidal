@@ -1,0 +1,25 @@
+setcps (120/60/4)
+
+let model = pI "model"
+    timbre = pF "timbre"
+    color = pF "color"
+
+d1 
+  $ n "<[1 ~*7] [1 ~*4] [~ ~ 1 ~] [[~ 1] ~ 1 ~]>"
+  # s "braid" 
+  # model 34
+  # freq 100
+  # timbre 0.2
+  # color 0.5
+  # sustain 0.1
+  # amp 10
+
+d2
+  $ n "~ 1 ~ ~"
+  # s "braid" 
+  # model 36
+  # freq 100
+  # timbre 0.2
+  # color 0.75
+  # sustain 0.1
+  # amp 10

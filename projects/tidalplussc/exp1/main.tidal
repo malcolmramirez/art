@@ -1,20 +1,28 @@
 setcps (75/60/4)
 
+d2
+  $ echoWith 4 (1/4) (ply 2)
+  $ fast "2 1 <2 0.5> 0.5"
+  $ n "c e g bs" 
+  # s "braid"
+  # octave 4
+  # sustain 0.1
+  # silence
+
 d1
   $ echoWith 4 (1/8) (
     (|* speed "2") . 
     (# attack 0.1) . 
-    (# release 0.1) .
-
+    (# release 0.1)
   )
   $ slow 2
-  $ n "a'maj7" 
+  $ n "<a'maj7 b'min7>" 
   # s "supercomparator"
   # voice 2
   # pitch1 1
   # octave 3
   # attack 1
-  # release 1
+  # release 8
   # delay 1
   # delayt (1/6)
   # delayfb 0.15
@@ -29,6 +37,7 @@ d2
   $ jux rev
   $ n "<0 0 0 [~ 0 ~ ~]>"
   # s "cpu"
+  # amp 1
 
 d3
   $ n "1(1, 8, 2)"
@@ -40,6 +49,6 @@ d4
   $ almostNever ((ply 4) . (# speed 2))
   $ n "4*8"
   # s "cpu"
-  # amp (1/3)
+  # amp 1
 
  

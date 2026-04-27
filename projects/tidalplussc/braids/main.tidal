@@ -1,0 +1,47 @@
+let model = pI "model" 
+    timbre = pF "timbre"
+    color = pF "color"
+
+d1
+  $ juxBy (range (-0.5) 0.5 $ sine) rev
+  $ rarely (# echo 4 (1/6) (1/2))
+  $ n "a'maj7"
+  # octave "<4 5 5 4>"
+  # s "braid"
+  # model 38
+  # sustain (1/32)
+  # timbre (slow "4 3 <0.5 1 2> <1 0.5>" $ sine)
+  # color (fast 3 $ saw)
+  # crush 12
+  # room 0.8
+  # size 0.5
+  # dry 0
+  # lpf (range 400 1200 $ sine)
+  # amp (3/4)
+
+d2
+  $ n "1*4"
+  # s "cpu2:0"
+  # shape (range 0.5 0.8 $ sine)
+  # amp 1
+
+d3
+  $ n "<[~ ~ 1 ~ ~ ~ 1 ~] [~ ~ 1 ~ ~ 1 [~ 1] ~] [~ ~ 1 ~ [~ 1] ~ 1 ~] [~ ~ 1 ~ ~ ~ 1 ~]>"
+  # s "braid"
+  # model 36
+  # sustain "0.05"
+  # color (range 0.8 1 $ rand)
+  # timbre (slow 2 $ sine)
+  # amp 2
+
+d4
+  $ n "<[~ ~ 1 ~ ~ ~ 1 ~] [~ ~ 1 ~ ~ 1 [~ 1] ~] [~ ~ 1 ~ [~ 1] ~ 1 ~] [~ ~ 1 ~ ~ ~ 1 ~]>"
+  # s "braid"
+  # model 36
+  # sustain "0.05"
+  # color (range 0.8 1 $ rand)
+  # timbre (slow 2 $ sine)
+  # amp 2
+
+
+
