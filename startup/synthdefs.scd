@@ -114,8 +114,20 @@ SynthDef(\neuron, {
 
     var feedback = LocalIn.ar(1);
     sig = (sig * weights) + (feedback * \fbamt.ar(0.5));
-    sig = sig.sum / (wsize + \fbamt.ar(0.5));
-    sig = Normalizer.ar(sig);
+    sig = sig.sum / (wsize + 1);
+    sig = sig.tanh;
+    LocalOut.ar(sig);
+
+    Out.ar(\i_out.kr(0), sig!2);
+}).add;
+
+SynthDef(\neuron2, {
+    // in, seed, fb
+    var sig = \in.ar(#[0,0,0,0]);
+    var weights = \weights.ar(#[0,0,0,0]);
+    var feedback = LocalIn.ar(1);
+    sig = (sig * weights) + (feedback * \fbamt.ar(0.5));
+    sig = sig.sum / (weights.size + 1);
     sig = sig.tanh;
     LocalOut.ar(sig);
 

@@ -1,0 +1,39 @@
+import Sound.Osc
+import Sound.Osc.Transport.Fd.Udp
+
+do
+  setcps (140/60/4)
+  resetCycles
+  fd <- openUdp "127.0.0.1" 57120
+  udp_send_packet fd (Packet_Message (Message "/tempo" [Sound.Osc.float (120/60 :: Double)]))
+  udp_close fd
+
+
+:browse Sound.Osc.Transport.Fd.Udp
+
+d1 
+  $ stack [
+    -- kd
+    -- n (pS $ lindenmayer 5 "~:~00,0:~0~" "~"),
+    n "<[0 ~ ~ 0 ~ 0 ~ 0] [0 ~ ~ 0 ~ ~ 0 0] [0 ~ ~ 0 ~ 0 ~ 0] [~ ~ ~ ~ 0 ~ ~ 0]>",
+    -- hh
+    echo 8 (1/6) 0.75
+      $ n "~ ~ 4 ~ ~ ~ ~ ~"
+      # speed 2
+      # amp 1,
+    -- sd
+    n "<2(2, 8) [2 ~ ~ [2 ~] [~ 2] ~ ~ ~]>"
+      # speed 6
+      # lpf 3000
+      # amp 1,
+    sometimes (ply 3)
+      $ rarely (ghost' (1/32))
+      $ every 4 (rotR 4)
+      $ n "24(2, 16)"
+      # speed "<[<4 2> 1 <4 2 0.25> <3 1>] [<1 0.5> 0.5 2 <0.25 4>]>"
+      # hpf 1000
+      # amp 0.3
+    ]
+  # s "cpu"
+
+d2 $ silence
